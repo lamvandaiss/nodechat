@@ -19,6 +19,10 @@ app.use(express.json());
 
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/messages", require("./routes/messages"));
+app.use("/uploads", express.static("public/uploads"));
+
+const userRoutes = require("./routes/users");
+app.use("/api/users", userRoutes);
 
 // Sample route
 app.get("/", (req, res) => {
