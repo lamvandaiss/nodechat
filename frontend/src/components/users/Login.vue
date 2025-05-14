@@ -74,7 +74,7 @@ export default {
         if (res.ok) {
           // Save token or session info
           localStorage.setItem('token', data.token)
-          this.$router.push('/dashboard') // Redirect to dashboard or chat
+          this.$router.push('/chat') // Redirect to chat
         } else {
           this.serverError = data.error || 'Login failed'
         }

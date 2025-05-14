@@ -20,7 +20,10 @@ import HelloWorld from './components/HelloWorld.vue'
   <RouterView />
 </template>
 
-<style scoped>
+<style>
+body {
+  background-color: darkolivegreen;
+}
 header {
   line-height: 1.5;
   max-height: 100vh;

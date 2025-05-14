@@ -79,7 +79,6 @@ export default {
 .message {
   margin-bottom: 8px;
   padding: 5px;
-  background-color: #f9f9f9;
   border-radius: 4px;
 }
 
@@ -97,6 +96,7 @@ export default {
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  outline: none;
 }
 
 .message-input button {

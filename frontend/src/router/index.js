@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import ChatComp from '../components/ChatComp.vue'
 import UserRegister from '../components/users/Register.vue'
 import UserLogin from '../components/users/Login.vue'
+import UserProfile from '../components/users/Profile.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -34,6 +35,11 @@ const router = createRouter({
       path: '/user-login',
       name: 'UserLogin',
       component: UserLogin,
+    },
+    {
+      path: '/user-profile',
+      name: 'UserProfile',
+      component: UserProfile,
     },
   ],
 })

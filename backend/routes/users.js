@@ -5,6 +5,7 @@ const User = require("../models/User");
 const upload = require("../middleware/upload");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const authMiddleware = require("../middleware/auth");
 
 // PATCH /api/users/:id/avatar
 router.patch("/:id/avatar", upload.single("avatar"), async (req, res) => {
@@ -75,6 +76,29 @@ router.post("/login", async (req, res) => {
     expiresIn: "1d",
   });
   res.status(200).json({ token });
+});
+
+// GET current user
+router.get("/me", authMiddleware, async (req, res) => {
+  const user = await User.findById(req.userId).select("-password");
+  console.log(user);
+  res.json(user);
+});
+
+// PUT update profile
+router.put("/me", authMiddleware, async (req, res) => {
+  const { username, email } = req.body;
+  const updatedUser = await User.findByIdAndUpdate(
+    req.userId,
+    { username, email },
+    { new: true }
+  );
+  res.json(updatedUser);
+});
+
+// POST logout
+router.post("/logout", (req, res) => {
+  res.clearCookie("token").json({ message: "Logged out" });
 });
 
 module.exports = router;
