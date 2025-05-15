@@ -54,37 +54,37 @@ export default {
   },
   methods: {
     async updateProfile() {
+      this.error = ''
+      this.success = ''
+
       try {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/me`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify(this.user),
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: JSON.stringify({
+            username: this.user.username,
+            email: this.user.email,
+          }),
         })
 
         const data = await res.json()
 
         if (res.ok) {
-          this.message = 'Profile updated successfully!'
-          this.error = ''
+          this.success = 'Profile updated successfully'
         } else {
-          this.error = data.error || 'Update failed!'
+          this.error = data.message || 'Update failed'
         }
       } catch (err) {
-        this.error = 'Server error: ' + err.message
+        this.error = 'Server error'
       }
     },
 
-    async logout() {
-      try {
-        await fetch(`${import.meta.env.VITE_API_URL}/api/users/logout`, {
-          method: 'POST',
-          credentials: 'include',
-        })
-        this.$router.push('/user-login')
-      } catch (err) {
-        console.error('Logout failed')
-      }
+    logout() {
+      localStorage.removeItem('token')
+      this.$router.push('/user-login')
     },
   },
 }

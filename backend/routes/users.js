@@ -6,6 +6,7 @@ const upload = require("../middleware/upload");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const authMiddleware = require("../middleware/auth");
+const jwtSecret = process.env.JWT_SECRET;
 
 // PATCH /api/users/:id/avatar
 router.patch("/:id/avatar", upload.single("avatar"), async (req, res) => {
@@ -71,34 +72,51 @@ router.post("/login", async (req, res) => {
 
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
+  const token = jwt.sign({ userId: user._id }, jwtSecret, { expiresIn: "1d" });
 
-  const token = jwt.sign({ userId: user._id }, "your-secret-key", {
-    expiresIn: "1d",
-  });
   res.status(200).json({ token });
 });
 
 // GET current user
+// GET /api/users/me
 router.get("/me", authMiddleware, async (req, res) => {
-  const user = await User.findById(req.userId).select("-password");
-  console.log(user);
-  res.json(user);
+  try {
+    // req.user is set by authMiddleware after verifying JWT
+    const user = await User.findById(req.user.userId).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 // PUT update profile
-router.put("/me", authMiddleware, async (req, res) => {
-  const { username, email } = req.body;
-  const updatedUser = await User.findByIdAndUpdate(
-    req.userId,
-    { username, email },
-    { new: true }
-  );
-  res.json(updatedUser);
-});
+// PATCH /api/users/me
+router.patch("/me", authMiddleware, async (req, res) => {
+  try {
+    const updates = req.body;
+    const allowedFields = ["username", "email"]; // Allow only safe fields
+    const updateData = {};
 
-// POST logout
-router.post("/logout", (req, res) => {
-  res.clearCookie("token").json({ message: "Logged out" });
+    for (let field of allowedFields) {
+      if (updates[field] !== undefined) {
+        updateData[field] = updates[field];
+      }
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.userId,
+      updateData,
+      { new: true }
+    ).select("-password");
+
+    res.json(updatedUser);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update profile" });
+  }
 });
 
 module.exports = router;
